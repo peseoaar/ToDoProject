@@ -21,7 +21,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             exit();
         }
     } else {
-        echo "usuario nao encontrado";
+        echo "usuario nao encontrado. <a href='index.html'>tentar novamente</a><br>";
+        echo "se voce nao possui uma conta: <a href='cadastro.html'>cadastre-se</a>";
     }
 
     $conn->close();
