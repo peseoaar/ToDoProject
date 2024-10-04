@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "php",
+            "name": "ToDoProject",
+            "file": "teste.php"
+        }
+
+    ]
+}
