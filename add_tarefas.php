@@ -63,6 +63,42 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
         }
     }
 
+    #excluindo item
+    if (isset($_POST['id'])) {
+        $id = $_POST['id'];
+
+        // Prepara a consulta para excluir um item
+        $sql = "DELETE FROM todos WHERE id = ?";
+        $stmt = $conn->prepare($sql); # prepara para a consulta sql
+        $stmt->bind_param("i", $id); # bind - deixando o parametro escondido para evitar sql_injeciton
+        $stmt->execute();  # stmt e usado no lugar do result em casos de sql preparados
+
+        if ($stmt->affected_rows > 0) {
+            echo "sucesso";
+        } else {
+            echo "erro";
+        }
+        exit();
+    }
+
+
+    # editando item
+    if (isset($_POST['novo_texto'], $_POST['id'])) {
+        $novo_texto = $_POST['novo_texto'];
+        $id = $_POST['id'];
+
+        $sql = "UPDATE todos SET tarefa=? WHERE id=?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("si", $novo_texto, $id);
+        $stmt->execute();
+
+        if ($stmt->affected_rows > 0) {
+            echo "sucesso";
+        } else {
+            echo "erro";
+        }
+        exit();
+    }
 
 
     header('Location: site.php');

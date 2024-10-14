@@ -8,6 +8,7 @@
     </style>
 </head>
 <body>
+    <script src="jquery-3.7.1.min.js"></script>
     <div style="text-align: center; margin: 0 auto;">
         <?php
         include 'conectar.php';
@@ -24,12 +25,11 @@
         ?>
 
         <h1>To-do de <?php echo "$nome" ?></h1><br>
-        <h2>Suas tarefas</h2>
 
         <!-- formulario para add tarefas -->
         <form action="add_tarefas.php" method="post">
-            <input type="text" name="tarefa" id="id_tarefa" placeholder="Digite sua tarefa aqui"/><br><br>
-            <input type="submit" value="Adicionar">
+            <input type="text" name="tarefa" id="id_tarefa" placeholder="Digite sua tarefa aqui"/>
+            <input type="submit" value="Adicionar"> <br><br>
         </form>
 
         <!-- formulario para dar check(V) nas tarefas -->
@@ -45,6 +45,7 @@
         ?>
 
         <form action="add_tarefas.php" method="post">
+            <ul>
         <?php
             # buscando itens relacionados ao id
             $sql = "SELECT * FROM todos WHERE user_id = '$id_usuario'";
@@ -52,20 +53,81 @@
 
             #checkbox e itens
             if ($result_itens->num_rows > 0) {
+                $data_id = 1;
                 while ($item = $result_itens->fetch_assoc()) {
                     ?>
                         <div>
                             <label>
-                                <input type="checkbox" name="itens_selecionados[]" value="<?php echo $item['id']; ?>" <?php if($item['completado'] == 1) echo 'checked'?>/>
+                                <li data-id="<?php echo $data_id; ?>"><input type="checkbox" name="itens_selecionados[]" value="<?php echo $item['id']; ?>"  <?php if($item['completado'] == 1) echo 'checked'?>/>
                                 <?php echo htmlspecialchars($item['tarefa']); ?>
-                                <input type="button" value="x">
+                                    <input type="button" class="editar" value=":">
+                                    <input type="button" class="excluir" value="x" >
+                                </li>
+
                             </label>
                         </div>
                     <?php
+                    $data_id++;
                 }
             }
         ?>
-            <input type="submit" value="Salvar">
+            <input type="submit" id="botao_enviar" value="Salvar">
+
+
+        <!-- script jquery para apagar tarefa -->
+            <script>
+                $(document).ready(function() {
+                    $("#botao_enviar").click(function(){
+                        alert("Alteracoes salvas!")
+                    });
+
+                    $(".excluir").click(function(){
+                        var id = $(this).parent().data("id");
+
+                        // Pergunta se tem certeza que quer excluir
+                        var confirmacao = confirm("Tem certeza que deseja excluir este item da lista?");
+                        if (confirmacao) {
+                            $.ajax({
+                                url: "add_tarefas.php",
+                                type: "POST",
+                                data: { id: id }, // Corrigido o envio dos dados
+                            });
+                        } else {
+                            alert('Exclusão cancelada!');
+                        }
+                    });
+                });
+            </script>
+
+
+                <!-- script para editar tarefa -->
+                <script>
+                    $(document).ready(function() {
+                        $(".editar").click(function(){
+                            var item = $(this).parent();
+                            var texto_atual = item.text().trim(); // Pegando o texto atual
+                            item.html("<input type='text' class='novo_texto' value='" + texto_atual + "'/> <button class='salvar'>Salvar</button>");
+                        });
+
+                        $(document).on("click", ".salvar", function(){
+                            var item = $(this).parent();
+                            var novo_texto = item.find(".novo_texto").val();
+                            var id = item.data("id");
+
+                            $.ajax({
+                               url: "add_tarefa.php",
+                               type: "POST",
+                               data: {novo_texto: novo_texto, id: id},
+                               success: function(response) {
+                                   item.html(novo_texto + " <input type='button' class='editar' value=':'>");
+                               }
+                            });
+                        }
+                    });
+                </script>
+
+
+                </ul>
         </form>
     </div>
 </body>
